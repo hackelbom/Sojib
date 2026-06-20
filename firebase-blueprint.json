@@ -1,0 +1,122 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Represents a user of the Telegram Mini Video sharing app",
+      "type": "object",
+      "properties": {
+        "telegramId": { "type": "string", "description": "The telegram ID or unique auth uid" },
+        "username": { "type": "string", "description": "Telegram username or custom display name" },
+        "displayName": { "type": "string" },
+        "points": { "type": "number", "description": "Current points of the user" },
+        "referralCode": { "type": "string", "description": "Unique referral code for this user" },
+        "referredBy": { "type": "string", "description": "Who referred this user" },
+        "referralCount": { "type": "number", "description": "Number of users referred by this user" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "isAdmin": { "type": "boolean" }
+      },
+      "required": ["telegramId", "points", "referralCode"]
+    },
+    "Video": {
+      "title": "Video",
+      "description": "Viral premium videos shared on the platform",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "thumbnailUrl": { "type": "string" },
+        "videoUrl": { "type": "string" },
+        "duration": { "type": "string" },
+        "views": { "type": "number" },
+        "likes": { "type": "number" },
+        "isLocked": { "type": "boolean" },
+        "requiredPoints": { "type": "number" },
+        "category": { "type": "string" },
+        "externalUnlockLink": { "type": "string" },
+        "reLockDurationMinutes": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "videoUrl", "isLocked"]
+    },
+    "Notice": {
+      "title": "Notice",
+      "description": "Admin announcements showing at Notice Bar or popup",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "category": { "type": "string", "enum": ["info", "update", "warning", "promotion"] },
+        "isPinned": { "type": "boolean" },
+        "link": { "type": "string" },
+        "isPopup": { "type": "boolean" },
+        "publishDate": { "type": "string", "format": "date-time" },
+        "expiryDate": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "content", "category"]
+    },
+    "PointHistory": {
+      "title": "PointHistory",
+      "description": "Log of point transactions for ad views, refers or unlocks",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "type": { "type": "string", "enum": ["earn_ad", "spend_unlock", "referral_bonus", "admin_adjust"] },
+        "points": { "type": "number" },
+        "description": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "type", "points", "createdAt"]
+    },
+    "UnlockedVideo": {
+      "title": "UnlockedVideo",
+      "description": "Tracks videos unlocked by specific users and their expiry times",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "videoId": { "type": "string" },
+        "unlockedAt": { "type": "string", "format": "date-time" },
+        "expiresAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "videoId", "unlockedAt", "expiresAt"]
+    },
+    "Referral": {
+      "title": "Referral",
+      "description": "Log of referral relationships",
+      "type": "object",
+      "properties": {
+        "referrerId": { "type": "string" },
+        "referredId": { "type": "string" },
+        "pointsAwarded": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["referrerId", "referredId", "pointsAwarded", "createdAt"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "User",
+      "description": "Collection of user profiles containing scores and referrals"
+    },
+    "videos/{videoId}": {
+      "schema": "Video",
+      "description": "Collection of videos listed by administrator"
+    },
+    "notices/{noticeId}": {
+      "schema": "Notice",
+      "description": "Admin announcements/notices with scheduled publish and expiry"
+    },
+    "pointHistory/{historyId}": {
+      "schema": "PointHistory",
+      "description": "Logs of points earned/spent"
+    },
+    "unlockedVideos/{unlockId}": {
+      "schema": "UnlockedVideo",
+      "description": "Mappings of video locks purchased by users"
+    },
+    "referrals/{referralId}": {
+      "schema": "Referral",
+      "description": "Mapping of referral logs"
+    }
+  }
+}

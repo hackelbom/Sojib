@@ -1,0 +1,6 @@
+{
+  "name": "Telegram Mini Video App",
+  "description": "A modern Telegram Mini App for viral video sharing with a robust premium dark theme, announcement bar, point earning, video unlocks, referrals, and an admin dashboard.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

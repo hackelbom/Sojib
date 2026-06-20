@@ -1,0 +1,60 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Check if the user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Check if the user is the owner of the document
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Check if user is an admin (we'll fetch the user doc to verify, or check a custom claim)
+    function isAdmin() {
+      return isAuthenticated() && 
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true ||
+         request.auth.token.admin == true);
+    }
+
+    // Users Collection rules
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      // Allow creation of profiles, allow users to update their own profile, and allow admin full control
+      allow write: if isOwner(userId) || isAdmin() || (isAuthenticated() && !exists(/databases/$(database)/documents/users/$(userId)));
+    }
+
+    // Videos Collection rules
+    match /videos/{videoId} {
+      allow read: if true; // Publicly viewable
+      allow write: if isAdmin(); // Only admins can create/update/delete
+    }
+
+    // Notices Collection rules
+    match /notices/{noticeId} {
+      allow read: if true; // Publicly viewable
+      allow write: if isAdmin(); // Only admins can create/update/delete
+    }
+
+    // PointHistory rules
+    match /pointHistory/{historyId} {
+      allow read, create: if isAuthenticated() && (request.resource.data.userId == request.auth.uid || isAdmin());
+      allow update, delete: if isAdmin();
+    }
+
+    // Unlocked Videos rules
+    match /unlockedVideos/{unlockId} {
+      allow read, create, update: if isAuthenticated() && (request.resource.data.userId == request.auth.uid || resource.data.userId == request.auth.uid || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    // Referrals rules
+    match /referrals/{referralId} {
+      allow read: if isAuthenticated() && (resource.data.referrerId == request.auth.uid || resource.data.referredId == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated() && (request.resource.data.referredId == request.auth.uid || request.resource.data.referrerId == request.auth.uid || isAdmin());
+      allow update, delete: if isAdmin();
+    }
+  }
+}
